@@ -1,0 +1,13 @@
+*.enc
+.env
+.env.*
+! .gitignore
+! cryptenv.py
+! README.md
+! LICENSE
+! requirements.txt
+__pycache__/
+*.py[cod]
+.venv/
+env/
+.DS_Store

@@ -328,3 +328,5 @@ def main(argv: list[str] | None = None) -> NoReturn:
 
 if __name__ == "__main__":
     main()
+    
+""" made with ♡ by quadraturbo """

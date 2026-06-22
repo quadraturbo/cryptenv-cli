@@ -29,11 +29,11 @@ except ImportError as exc:  # pragma: no cover
 
 # ---------------------------------------------------------------------------
 
-MAGIC: Final[bytes] = b"CENV1"          # cabecera del contenedor binario
-NONCE_SIZE: Final[int] = 12             # 96 bits, recomendado para GCM
+MAGIC: Final[bytes] = b"CENV1"         
+NONCE_SIZE: Final[int] = 12             
 KEY_SIZE_BITS: Final[int] = 256
 KEYRING_SERVICE: Final[str] = "cryptenv"
-AAD: Final[bytes] = b"cryptenv/aes-256-gcm/v1"  # datos autenticados adicionales
+AAD: Final[bytes] = b"cryptenv/aes-256-gcm/v1" 
 ENC_SUFFIX: Final[str] = ".enc"
 DEFAULT_ENV: Final[str] = "dev"
 ENC_TEMPLATE: Final[str] = ".env.{env}.enc"
@@ -72,14 +72,7 @@ class CryptEnvError(Exception):
 
 
 def check_keyring_privileges() -> None:
-    """Valida que el proceso pueda interactuar con el almacén de credenciales.
-
-    Windows: abre el token de seguridad del proceso vía ctypes — es el
-    contexto que LSASS exige para operar el Credential Manager. Si UAC u
-    otra política lo bloquea, se aborta con un mensaje claro.
-    Linux/macOS: exige uid real y efectivo coherentes (un binario setuid
-    mezclaría almacenes de credenciales de usuarios distintos).
-    """
+  
     if sys.platform == "win32":
         import ctypes
 
@@ -109,12 +102,6 @@ def check_keyring_privileges() -> None:
 
 
 class CryptEnv:
-    """Cifrado/descifrado de archivos .env con clave maestra por proyecto.
-
-    La clave AES-256 se vincula al PATH absoluto del directorio del proyecto
-    combinado con el nombre del entorno (dev/staging/prod/...), de modo que
-    cada entorno tiene una clave maestra independiente en el almacén del SO.
-    """
 
     def __init__(self, env: str = DEFAULT_ENV, project_dir: Path | None = None) -> None:
         if not _ENV_NAME_RE.fullmatch(env):
@@ -164,11 +151,7 @@ class CryptEnv:
 
     @staticmethod
     def _secure_delete(path: Path) -> None:
-        """Sobrescribe el archivo con bytes aleatorios antes de eliminarlo.
-
-        Nota: en SSD con wear-leveling y filesystems con journaling esto es
-        best-effort; la garantía real la da no volver a escribir texto plano.
-        """
+      
         size = path.stat().st_size
         with path.open("r+b", buffering=0) as fh:
             fh.write(secrets.token_bytes(size))
@@ -250,12 +233,7 @@ class CryptEnv:
         return env
 
     def run(self, command: list[str], enc_file: Path | None = None) -> int:
-        """Lanza `command` como subproceso con las variables descifradas.
-
-        El texto plano nunca toca el disco: se descifra a un buffer en
-        memoria, se inyecta en el `env` del hijo y el buffer se sobrescribe
-        inmediatamente después de lanzar el proceso.
-        """
+       
         if not command:
             raise CryptEnvError("no se especificó comando. Uso: cryptenv run -- <comando>")
 
@@ -272,7 +250,6 @@ class CryptEnv:
             f"en memoria → {' '.join(command)}"
         )
 
-        # En Windows, ejecutables como `npm` son .cmd: resolver con which.
         executable = shutil.which(command[0])
         if executable is None:
             raise CryptEnvError(f"comando no encontrado en PATH: {command[0]}")
